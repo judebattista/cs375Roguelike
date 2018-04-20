@@ -33,11 +33,24 @@ public class Enemy : MovingObject {
 	public void MoveEnemy() {
 		int xDir = 0;
 		int yDir = 0;
+		double xDistance = Mathf.Abs(target.position.x - transform.position.x);
+		double yDistance = Mathf.Abs(target.position.y - transform.position.y);
+		//If they're in the same row
+		/*
 		if (Mathf.Abs(target.position.x - transform.position.x) < float.Epsilon)
 		{
 			yDir = target.position.y > transform.position.y ? 1 : -1;
 		}
 		else {
+			xDir = target.position.x > transform.position.x ? 1 : -1;
+		}
+		*/
+		if (xDistance < yDistance)
+		{
+			yDir = target.position.y > transform.position.y ? 1 : -1;
+		}
+		else
+		{
 			xDir = target.position.x > transform.position.x ? 1 : -1;
 		}
 		AttemptMove<Player>(xDir, yDir);

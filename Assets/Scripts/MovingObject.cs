@@ -39,6 +39,7 @@ public abstract class MovingObject : MonoBehaviour {
 		}
 		T hitComponent = hit.transform.GetComponent<T>();
 		if (!canMove && hitComponent != null) {
+			Debug.Log("Tried to enter a blocked space");
 			OnCantMove(hitComponent);
 		}
 	}

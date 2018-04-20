@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour {
 		DontDestroyOnLoad(gameObject);
 		enemies = new List<Enemy>();
 		boardScript = GetComponent<BoardManager>();
+		Debug.LogError("Inititalizing Game from Awake");
 		InitGame();
 	}
 
@@ -59,6 +60,7 @@ public class GameManager : MonoBehaviour {
 		//Increment level number
 		level++;
 		//Initialize level
+		Debug.LogError("Inititalizing Game from OnLevelFinishedLoading");
 		InitGame();
 	}
 
@@ -72,7 +74,7 @@ public class GameManager : MonoBehaviour {
 	void OnDisable()
 	{
 		//Tell our OnLevelFinishedLoading fcn to stop listening for a scene change event as soon as
-		//this script is disabled. Unsubscribe from every delegate you subscribe too!
+		//this script is disabled. Unsubscribe from every delegate you subscribe to!
 		SceneManager.sceneLoaded -= OnLevelFinishedLoading;
 	}
 

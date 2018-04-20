@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System;
 
 public class Player : MovingObject {
 	public int wallDamage = 1;
@@ -112,17 +113,28 @@ public class Player : MovingObject {
 			food += pointsPerFood;
 			foodText.text = "+" + pointsPerFood + " Food; " + food;
 			SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
-			other.gameObject.SetActive(false);
+			//other.gameObject.SetActive(false);
+			Destroy(other.gameObject);
 		}
-		else if (other.tag == "Soda") {
+		else if (other.tag == "Soda")
+		{
 			food += pointsPerSoda;
 			foodText.text = "+" + pointsPerSoda + " Food; " + food;
 			SoundManager.instance.RandomizeSfx(drinkSound1, drinkSound2);
-			other.gameObject.SetActive(false);
+			//other.gameObject.SetActive(false);
+			Destroy(other.gameObject);
+		}
+		else if (other.tag == "Enemy")
+		{
+			Debug.Log("Tried to enter an enemy's space");
+		}
+		else {
+			Debug.Log("2D collision detected");
 		}
 	}
 
 	protected override void OnCantMove<T>(T component) {
+		Debug.Log("Tried to enter a blocked space");
 		Wall hitWall = component as Wall;
 		hitWall.DamageWall(wallDamage);
 		animator.SetTrigger("PlayerChop");

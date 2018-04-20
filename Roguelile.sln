@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2017
+# Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roguelile", "Roguelile.csproj", "{A19B8226-CB1F-E298-4E10-8F61D71C39C9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roguelile.Editor", "Roguelile.Editor.csproj", "{D1104FA9-E37E-2840-A26D-ADC2A8199096}"
