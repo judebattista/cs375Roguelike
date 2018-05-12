@@ -5,9 +5,12 @@ using UnityEngine;
 public class Enemy : MovingObject {
 
 	public int playerDamage;
+	public int hitPoints;
 	public AudioClip enemyAttack1;
 	public AudioClip enemyAttack2;
 
+	public AudioClip chopSound1;
+	public AudioClip chopSound2;
 	private Animator animator;
 	private Transform target;
 	private bool skipMove;
@@ -61,5 +64,18 @@ public class Enemy : MovingObject {
 		animator.SetTrigger("EnemyAttack");
 		hitPlayer.LoseFood(playerDamage);
 		SoundManager.instance.RandomizeSfx(enemyAttack1, enemyAttack2);
+	}
+
+	public bool TakeDamage(int damage) {
+		bool killed = false;
+		hitPoints -= damage;
+		SoundManager.instance.RandomizeSfx(chopSound1, chopSound2);
+		if (hitPoints <= 0)
+		{
+			killed = true;
+			//gameObject.SetActive(false);
+			Destroy(this.gameObject);
+		}
+		return killed;
 	}
 }

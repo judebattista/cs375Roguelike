@@ -5,8 +5,10 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System;
 
-public class Player : MovingObject {
+public class Player : MovingObject
+{
 	public int wallDamage = 1;
+	public int enemyDamage = 10;
 	public int pointsPerFood = 10;
 	public int pointsPerSoda = 20;
 	public float restartLevelDelay = 1f;
@@ -26,7 +28,8 @@ public class Player : MovingObject {
 
 
 	// Use this for initialization
-	protected override void Start () {
+	protected override void Start()
+	{
 		animator = GetComponent<Animator>();
 		food = GameManager.instance.playerFoodPoints;
 		foodText.text = "Food: " + food;
@@ -39,8 +42,10 @@ public class Player : MovingObject {
 	}
 
 	// Update is called once per frame
-	void Update () {
-		if (!GameManager.instance.playersTurn) {
+	void Update()
+	{
+		if (!GameManager.instance.playersTurn)
+		{
 			return;
 		}
 		int horizontal = 0;
@@ -51,7 +56,8 @@ public class Player : MovingObject {
 		vertical = (int)Input.GetAxisRaw("Vertical");
 
 		//No diagonal movement
-		if (horizontal != 0) {
+		if (horizontal != 0)
+		{
 			vertical = 0;
 		}
 
@@ -81,9 +87,10 @@ public class Player : MovingObject {
 
 #endif
 
-		if (horizontal + vertical != 0) {
+		if (horizontal + vertical != 0)
+		{
 			//Because this is a player moving, it expects to possibly interact with a wall
-			AttemptMove<Wall>(horizontal, vertical); 
+			AttemptMove<MonoBehaviour>(horizontal, vertical);
 		}
 	}
 
@@ -94,7 +101,8 @@ public class Player : MovingObject {
 		foodText.text = "Food: " + food;
 		base.AttemptMove<T>(xDir, yDir);
 		RaycastHit2D hit;
-		if (Move(xDir, yDir, out hit)) {
+		if (Move(xDir, yDir, out hit))
+		{
 			SoundManager.instance.RandomizeSfx(moveSound1, moveSound2);
 		}
 		CheckIfGameOver();
@@ -124,38 +132,53 @@ public class Player : MovingObject {
 			//other.gameObject.SetActive(false);
 			Destroy(other.gameObject);
 		}
-		else if (other.tag == "Enemy")
+		else
 		{
-			Debug.Log("Tried to enter an enemy's space");
-		}
-		else {
 			Debug.Log("2D collision detected");
 		}
 	}
 
-	protected override void OnCantMove<T>(T component) {
-		Debug.Log("Tried to enter a blocked space");
-		Wall hitWall = component as Wall;
-		hitWall.DamageWall(wallDamage);
-		animator.SetTrigger("PlayerChop");
+	protected override void OnCantMove<T>(T component)
+	{
+		Debug.Log("Player can't move");
+		if (component.CompareTag("Wall")) {
+			Debug.Log("Player tried to enter a space blocked by " + component.tag);
+			Wall hitWall = component as Wall;
+			hitWall.DamageWall(wallDamage);
+			animator.SetTrigger("PlayerChop");
+		}
+		if (component.CompareTag("Enemy"))
+		{
+			Debug.Log("Player tried to enter a space blocked by " + component.tag);
+			Enemy hitEnemy = component as Enemy;
+			hitEnemy.TakeDamage(enemyDamage);
+			animator.SetTrigger("PlayerChop");
+		}
+		else {
+			Debug.Log("Player tried to enter a space blocked by " + component.tag);
+		}
 	}
 
-	private void Restart() {
+	private void Restart()
+	{
 		//Application.LoadLevel(Application.loadedLevel);
 		//Deprecated in favor of the following
 		SceneManager.LoadScene(0);
-		
+
 	}
 
-	public void LoseFood(int loss) {
+	public void LoseFood(int loss)
+	{
 		animator.SetTrigger("PlayerHit");
 		food -= loss;
 		foodText.text = "-" + loss + " Food; " + food;
 		CheckIfGameOver();
 	}
 
-	private void CheckIfGameOver() {
-		if (food <= 0) {
+	private void CheckIfGameOver()
+	{
+		if (food <= 0)
+		{
 			SoundManager.instance.PlaySingle(gameOverSound);
 			SoundManager.instance.musicSource.Stop();
 			GameManager.instance.GameOver();
