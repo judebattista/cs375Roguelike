@@ -93,7 +93,7 @@ public class Player : MovingObject
 		}
 	}
 
-	protected override void AttemptMove<T>(int xDir, int yDir)
+	protected override bool AttemptMove<T>(int xDir, int yDir)
 	{
 		//Movement takes food
 		food--;
@@ -108,7 +108,7 @@ public class Player : MovingObject
 		else {
 			charging = false;
 		}
-		base.AttemptMove<T>(xDir, yDir);
+		bool canMove = base.AttemptMove<T>(xDir, yDir);
 		RaycastHit2D hit;
 		if (Move(xDir, yDir, out hit))
 		{
@@ -119,6 +119,7 @@ public class Player : MovingObject
 		}
 		CheckIfGameOver();
 		GameManager.instance.playersTurn = false;
+		return canMove;
 	}
 
 	private void OnTriggerEnter2D(Collider2D other)

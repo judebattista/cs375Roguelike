@@ -22,32 +22,25 @@ public class Enemy : MovingObject {
 		base.Start();
 	}
 
-	protected override void AttemptMove<T>(int xDir, int yDir)
+	protected override bool AttemptMove<T>(int xDir, int yDir)
 	{
 		//Enemies only move every other turn
 		if (skipMove) {
 			skipMove = false;
-			return;
+			return false;
 		}
-		base.AttemptMove<T>(xDir, yDir);
+		bool canMove = base.AttemptMove<T>(xDir, yDir);
 		skipMove = true;
+		return canMove;
 	}
 
 	public void MoveEnemy() {
 		int xDir = 0;
 		int yDir = 0;
+		bool triedX = false;
 		double xDistance = Mathf.Abs(target.position.x - transform.position.x);
 		double yDistance = Mathf.Abs(target.position.y - transform.position.y);
-		//If they're in the same row
-		/*
-		if (Mathf.Abs(target.position.x - transform.position.x) < float.Epsilon)
-		{
-			yDir = target.position.y > transform.position.y ? 1 : -1;
-		}
-		else {
-			xDir = target.position.x > transform.position.x ? 1 : -1;
-		}
-		*/
+		//Try to close the largest distance first
 		if (xDistance < yDistance)
 		{
 			yDir = target.position.y > transform.position.y ? 1 : -1;
@@ -55,8 +48,25 @@ public class Enemy : MovingObject {
 		else
 		{
 			xDir = target.position.x > transform.position.x ? 1 : -1;
+			triedX = true;
 		}
-		AttemptMove<Player>(xDir, yDir);
+		bool canMove = AttemptMove<Player>(xDir, yDir);
+		//If the enemy cannot move along the selected axis, try the other
+		if (!canMove) {
+			if (triedX)
+			{
+				yDir = target.position.y > transform.position.y ? 1 : -1;
+				xDir = 0;
+			}
+			else {  //Don't currently need to check for triedY since we only have two options
+				xDir = target.position.x > transform.position.x ? 1 : -1;
+				yDir = 0;
+			}
+			//need to invert skipMove since we're making a second call to AttemptMove
+			skipMove = !skipMove;
+			canMove = AttemptMove<Player>(xDir, yDir);
+		}
+		
 	}
 
 	protected override void OnCantMove<T>(T component) {
