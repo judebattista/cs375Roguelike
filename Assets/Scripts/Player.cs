@@ -8,7 +8,6 @@ using System;
 public class Player : MovingObject
 {
 	public int wallDamage = 1;
-	public int enemyDamage = 10;
 	public int pointsPerFood = 10;
 	public int pointsPerSoda = 20;
 	public float restartLevelDelay = 1f;
@@ -25,7 +24,10 @@ public class Player : MovingObject
 	private Animator animator;
 	private int food;
 	private Vector2 touchOrigin = -Vector2.one;
-
+	private int previousXmove = 0;
+	private int previousYmove = 0;
+	private bool charging = false;
+	private int enemyDamage = 50;
 
 	// Use this for initialization
 	protected override void Start()
@@ -86,7 +88,6 @@ public class Player : MovingObject
 		}
 
 #endif
-
 		if (horizontal + vertical != 0)
 		{
 			//Because this is a player moving, it expects to possibly interact with a wall
@@ -99,11 +100,24 @@ public class Player : MovingObject
 		//Movement takes food
 		food--;
 		foodText.text = "Food: " + food;
+		//If we're trying to move the exact same direction we moved last time, we are officially charging
+		//If we stood still (xDir = yDir = 0), we are not charging.
+		if (xDir == this.previousXmove && yDir == this.previousYmove && xDir + yDir > 0)
+		{
+			charging = true;
+			Debug.Log("Charging lazers...");
+		}
+		else {
+			charging = false;
+		}
 		base.AttemptMove<T>(xDir, yDir);
 		RaycastHit2D hit;
 		if (Move(xDir, yDir, out hit))
 		{
 			SoundManager.instance.RandomizeSfx(moveSound1, moveSound2);
+			//Update the historical move direction
+			this.previousXmove = xDir;
+			this.previousYmove = yDir;
 		}
 		CheckIfGameOver();
 		GameManager.instance.playersTurn = false;
@@ -121,7 +135,6 @@ public class Player : MovingObject
 			food += pointsPerFood;
 			foodText.text = "+" + pointsPerFood + " Food; " + food;
 			SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
-			//other.gameObject.SetActive(false);
 			Destroy(other.gameObject);
 		}
 		else if (other.tag == "Soda")
@@ -129,7 +142,6 @@ public class Player : MovingObject
 			food += pointsPerSoda;
 			foodText.text = "+" + pointsPerSoda + " Food; " + food;
 			SoundManager.instance.RandomizeSfx(drinkSound1, drinkSound2);
-			//other.gameObject.SetActive(false);
 			Destroy(other.gameObject);
 		}
 		else
@@ -140,23 +152,40 @@ public class Player : MovingObject
 
 	protected override void OnCantMove<T>(T component)
 	{
+		this.previousXmove = 0;
+		this.previousYmove = 0;
 		Debug.Log("Player can't move");
+		//Check to see what's blocking the move
+		//If it's a wall, try to break it
 		if (component.CompareTag("Wall")) {
 			Debug.Log("Player tried to enter a space blocked by " + component.tag);
 			Wall hitWall = component as Wall;
 			hitWall.DamageWall(wallDamage);
 			animator.SetTrigger("PlayerChop");
 		}
+		//If it's an enemy, attack it.
 		if (component.CompareTag("Enemy"))
 		{
 			Debug.Log("Player tried to enter a space blocked by " + component.tag);
 			Enemy hitEnemy = component as Enemy;
-			hitEnemy.TakeDamage(enemyDamage);
+			//baseline damage
+			int damageDealt = enemyDamage;
+			//if the player is charging, they deal double damage
+			if (charging) {
+				damageDealt *= 2;
+			}
+			Debug.Log("Dealing " + damageDealt + " to an enemy.");
+			//If the player kills the enemy they get a damage boost.
+			if (hitEnemy.TakeDamage(damageDealt))
+			{
+				this.enemyDamage++;
+			}
 			animator.SetTrigger("PlayerChop");
 		}
 		else {
 			Debug.Log("Player tried to enter a space blocked by " + component.tag);
 		}
+		this.charging = false;
 	}
 
 	private void Restart()
