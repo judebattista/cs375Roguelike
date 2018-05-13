@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour {
 	public static GameManager instance = null;
 	public BoardManager boardScript;
 	public int playerFoodPoints = 100;
+	public int playerDamageToEnemy = 50;
+	public int playerHealth = 100;
 	[HideInInspector] public bool playersTurn = true;
 
 	private Text levelText;

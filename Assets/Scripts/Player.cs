@@ -27,7 +27,7 @@ public class Player : MovingObject
 	private int previousXmove = 0;
 	private int previousYmove = 0;
 	private bool charging = false;
-	private int enemyDamage = 50;
+	private int damageToEnemy = 50;
 
 	// Use this for initialization
 	protected override void Start()
@@ -83,10 +83,8 @@ public class Player : MovingObject
 				else {
 					vertical = y > 0 ? 1 : -1;
 				}
-
 			}
 		}
-
 #endif
 		if (horizontal + vertical != 0)
 		{
@@ -169,7 +167,7 @@ public class Player : MovingObject
 			Debug.Log("Player tried to enter a space blocked by " + component.tag);
 			Enemy hitEnemy = component as Enemy;
 			//baseline damage
-			int damageDealt = enemyDamage;
+			int damageDealt = GameManager.instance.playerDamageToEnemy;
 			//if the player is charging, they deal double damage
 			if (charging) {
 				damageDealt *= 2;
@@ -178,7 +176,7 @@ public class Player : MovingObject
 			//If the player kills the enemy they get a damage boost.
 			if (hitEnemy.TakeDamage(damageDealt))
 			{
-				this.enemyDamage++;
+				GameManager.instance.playerDamageToEnemy++;
 			}
 			animator.SetTrigger("PlayerChop");
 		}
@@ -193,7 +191,6 @@ public class Player : MovingObject
 		//Application.LoadLevel(Application.loadedLevel);
 		//Deprecated in favor of the following
 		SceneManager.LoadScene(0);
-
 	}
 
 	public void LoseFood(int loss)
